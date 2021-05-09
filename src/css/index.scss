@@ -1,0 +1,33 @@
+//normalize import from node_modules
+@import '../../node_modules/normalize.css/normalize';
+
+li {
+  ul & {
+    list-style-type: none;
+  }
+  .filters & {
+    float: left;
+    margin: 10px;
+  }
+}
+
+button {
+  background-color: white;
+  color: black;
+  padding: 5px 10px;
+  border: 1px solid black;
+  &.active {
+    color: white;
+    background-color: black;
+  }
+}
+
+.clear {
+  clear: both;
+}
+
+main {
+  width: 960px;
+  display: block;
+  margin: 0 auto;
+}
