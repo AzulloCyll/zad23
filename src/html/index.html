@@ -1,140 +1,206 @@
 <!DOCTYPE html>
 <html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, shrink-to-fit=no"
+    />
+    <title>Testowa strona</title>
+    <link rel="stylesheet" href="../css/index.scss" />
+  </head>
 
-<head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-	<meta name="viewport"
-		content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, shrink-to-fit=no" />
-	<title>Testowa strona</title>
-	<link rel="stylesheet" href="../css/index.scss" />
-</head>
+  <body>
+    <main id="main" class="main">
+      <div id="app">
+        <template v-if="!loginStatus">
+          <section>
+            <h2>Formularz logowania</h2>
 
-<body>
-	<main id="main" class="main">
-		<div id="app">
+            <label for="field-login">Login:</label>
+            <input
+              id="field-login"
+              type="text"
+              placeholder="podaj swój login"
+              v-model="user"
+              @keyup.enter="logIn"
+            />
+          </section>
+        </template>
 
-			<template v-if="!loginStatus">
-				<section>
-					<h2>Formularz logowania</h2>
+        <template v-else>
+          <section>
+            Witaj {{ user }}!
+            <button type="button" @click="logOut">Wyloguj</button>
+          </section>
 
-					<label for="field-login">Login:</label>
-					<input id="field-login" type="text" placeholder="podaj swój login" v-model="user"
-						@keyup.enter="logIn">
-				</section>
-			</template>
+          <section>
+            <h2>Formularz dodawania nowego produktu:</h2>
+            <form
+              method="POST"
+              name="newProduct"
+              @submit.prevent="addNewProduct"
+            >
+              <label for="input-product-name">Nazwa produktu</label>
+              <input
+                id="input-product-name"
+                name="input-product-name"
+                type="text"
+                v-model.trim="newProductName"
+                placeholder="Wpisz nazwę produktu"
+                @input="changeValueNewProductName"
+              />
 
-			<template v-else>
-				<section>
-					Witaj {{ user }}!
-					<button type="button" @click="logOut">Wyloguj</button>
-				</section>
+              <button type="submit">Dodaj nowy produkt</button>
 
-				<section>
-					<h2>Formularz dodawania nowego produktu:</h2>
-					<form method="POST" name="newProduct" @submit.prevent="addNewProduct">
-						<label for="input-product-name">Nazwa produktu</label>
-						<input id="input-product-name" name="input-product-name" type="text"
-							v-model.trim="newProductName" placeholder="Wpisz nazwę produktu"
-							@input="changeValueNewProductName">
+              <template v-if="newProductNameErrorDisplay">
+                <br />
+                <span> Uzupełnij pole nazwy produktu </span>
+              </template>
+            </form>
+          </section>
 
-						<button type="submit">Dodaj nowy produkt</button>
+          <section>
+            <h2>Wyszukiwarka:</h2>
+            <label for="search-by-product-name">Pole wyszukiwania</label>
+            <input
+              id="search-by-product-name"
+              type="search"
+              v-model="searchPhrase"
+              @input="searchByProductName"
+              placeholder="Proszę wpisać nazwę produktu"
+            />
+          </section>
 
-						<template v-if="newProductNameErrorDisplay">
-							<br>
-							<span>
-								Uzupełnij pole nazwy produktu
-							</span>
-						</template>
+          <section>
+            <h2>Filtrowanie:</h2>
+            <ul class="filters">
+              <li>
+                <button
+                  @click="filterByStatus('all'), setActive('all')"
+                  v-bind:class="{active: isActive('all')}"
+                >
+                  Wszystkie
+                </button>
+              </li>
+              <li>
+                <button
+                  @click=" filterByStatus('purchased'), setActive('purchased')"
+                  v-bind:class="{active: isActive('purchased')}"
+                >
+                  Kupione
+                </button>
+              </li>
+              <li>
+                <button
+                  @click="filterByStatus('tobuy', setActive('tobuy'))"
+                  v-bind:class="{active: isActive('tobuy')}"
+                >
+                  Niekupione
+                </button>
+              </li>
+            </ul>
+            <div class="clear"></div>
+          </section>
 
-					</form>
-				</section>
+          <section>
+            <h2>Sortowanie</h2>
+            <label for="sortby-product-name">Sortowanie alfaberyczne</label>
+            <select
+              name="sortby-product-name"
+              id="sortby-product-name"
+              @change="sortByProductName"
+              v-model="sortByProductNameValue"
+            >
+              <option :selected="sortByProductNameValue === 'asc'" value="asc">
+                od A do Z
+              </option>
+              <option
+                :selected="sortByProductNameValue === 'desc'"
+                value="desc"
+              >
+                od Z do A
+              </option>
+              <option :selected="sortByProductNameValue === 'def'" value="def">
+                domyślne
+              </option>
+            </select>
 
-				<section>
-					<h2>Wyszukiwarka:</h2>
-					<label for="search-by-product-name">Pole wyszukiwania</label>
-					<input id="search-by-product-name" type="search" v-model="searchPhrase" @input="searchByProductName"
-						placeholder="Proszę wpisać nazwę produktu">
-				</section>
+            <br />
 
-				<section>
-					<h2>Filtrowanie:</h2>
-					<ul class="filters">
-						<li>
-							<button @click="filterByStatus('all'), setActive('all')"
-								v-bind:class="{active: isActive('all')}">Wszystkie</button>
-						</li>
-						<li>
-							<button @click=" filterByStatus('purchased'), setActive('purchased')"
-								v-bind:class="{active: isActive('purchased')}">Kupione</button>
-						</li>
-						<li>
-							<button @click="filterByStatus('tobuy', setActive('tobuy'))"
-								v-bind:class="{active: isActive('tobuy')}">Niekupione</button>
-						</li>
-					</ul>
-					<div class="clear"></div>
-				</section>
+            <label for="sortby-product-price">Sortowanie po cenie</label>
+            <select
+              name="sortby-product-price"
+              id="sortby-product-price"
+              @change="sortByProductPrice"
+              v-model="sortByProductPriceValue"
+            >
+              <option :selected="sortByProductPriceValue === 'asc'" value="asc">
+                rosnąco
+              </option>
+              <option
+                :selected="sortByProductPriceValue === 'desc'"
+                value="desc"
+              >
+                malejąco
+              </option>
+              <option :selected="sortByProductPriceValue === 'def'" value="def">
+                domyślne
+              </option>
+            </select>
+          </section>
 
-				<section>
-					<h2>Sortowanie</h2>
-					<label for="sortby-product-name">Sortowanie alfaberyczne</label>
-					<select name="sortby-product-name" id="sortby-product-name" @change="sortByProductName"
-						v-model="sortByProductNameValue">
-						<option :selected="sortByProductNameValue === 'asc'" value="asc">od A do Z</option>
-						<option :selected="sortByProductNameValue === 'desc'" value="desc">od Z do A</option>
-						<option :selected="sortByProductNameValue === 'def'" value="def">domyślne</option>
-					</select>
+          <section>
+            <h2>Lista produktów</h2>
 
-					<br>
+            <ul v-if="filteredProducts.length > 0">
+              <li
+                v-for="product in filteredProducts"
+                :key="'product-' + product.id"
+              >
+                <div>
+                  <span v-text="product.name"></span>
+                  |
+                  <span>
+                    Status zakupu: {{ product.purchaseStatus }}
+                    <input
+                      type="checkbox"
+                      v-model="product.purchaseStatus"
+                      @change="updatePurchaseStatus(product, $event)"
+                    />
+                  </span>
+                  |
+                  <span
+                    >Cena: {{ product.price }}
 
-					<label for="sortby-product-price">Sortowanie po cenie</label>
-					<select name="sortby-product-price" id="sortby-product-price" @change="sortByProductPrice"
-						v-model="sortByProductPriceValue">
-						<option :selected="sortByProductPriceValue === 'asc'" value="asc">rosnąco</option>
-						<option :selected="sortByProductPriceValue === 'desc'" value="desc">malejąco</option>
-						<option :selected="sortByProductPriceValue === 'def'" value="def">domyślne</option>
-					</select>
+                    <input
+                      type="number"
+                      v-model.number="product.price"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      @change="updateProductPrice(product)"
+                    />
+                  </span>
 
+                  <button type="button" @click="removeProduct(product, $event)">
+                    Usuń
+                  </button>
+                </div>
+              </li>
+            </ul>
+            <p v-else>Brak produktów</p>
 
-				</section>
-
-				<section>
-					<h2>Lista produktów</h2>
-
-					<ul v-if="filteredProducts.length > 0">
-						<li v-for="product in filteredProducts" :key="'product-' + product.id">
-							<div>
-								<span v-text="product.name"></span>
-								|
-								<span>
-									Status zakupu: {{ product.purchaseStatus }}
-									<input type="checkbox" v-model="product.purchaseStatus"
-										@change="updatePurchaseStatus(product, $event)">
-								</span>
-								|
-								<span>Cena: {{ product.price }}
-
-									<input type="number" v-model.number="product.price" step="0.01" min="0"
-										placeholder="0.00" @change="updateProductPrice(product)">
-								</span>
-
-								<button type="button" @click="removeProduct(product, $event)">Usuń</button>
-							</div>
-						</li>
-					</ul>
-					<p v-else>Brak produktów</p>
-
-					<div v-if="filteredProducts.length > 0">
-						Zakupiono <b v-text="productsPurchasedCount"></b> z <b v-text="filteredProducts.length"></b> za
-						<b><span v-text="sumProductsPurchased"></span>
-							zł</b>
-					</div>
-				</section>
-			</template>
-		</div>
-	</main>
-	<script src="../js/index.js"></script>
-</body>
-
+            <div v-if="filteredProducts.length > 0">
+              Zakupiono <b v-text="productsPurchasedCount"></b> z
+              <b v-text="filteredProducts.length"></b> za
+              <b><span v-text="sumProductsPurchased"></span> zł</b>
+            </div>
+          </section>
+        </template>
+      </div>
+    </main>
+    <script src="../js/index.js" type="module"></script>
+  </body>
 </html>
